@@ -1,21 +1,18 @@
-package main
+package month2days
 
 import (
 	"archive/zip"
 	"encoding/csv"
 	"errors"
-	"flag"
 	"fmt"
 	"io"
 	"os"
 	"strings"
 )
 
-var flagOutput = flag.String("o", "output.zip", "output-zip name")
-
-func mains(args []string) error {
+func Convert(files []string, zipFd io.Writer) error {
 	data := map[string][]string{}
-	for _, fname := range args {
+	for _, fname := range files {
 		fd, err := os.Open(fname)
 		if err != nil {
 			return err
@@ -47,11 +44,6 @@ func mains(args []string) error {
 	if len(data) <= 0 {
 		return errors.New("no data")
 	}
-	zipFd, err := os.Create(*flagOutput)
-	if err != nil {
-		return err
-	}
-	defer zipFd.Close()
 	zipWriter := zip.NewWriter(zipFd)
 	defer zipWriter.Close()
 	for date, lines := range data {
@@ -67,13 +59,6 @@ func mains(args []string) error {
 			fmt.Fprintf(fd, "%s\r\n", line)
 		}
 	}
+	zipWriter.Flush()
 	return nil
-}
-
-func main() {
-	flag.Parse()
-	if err := mains(os.Args[1:]); err != nil {
-		fmt.Fprintln(os.Stderr, err.Error())
-		os.Exit(1)
-	}
 }
