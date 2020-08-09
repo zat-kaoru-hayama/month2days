@@ -1,12 +1,11 @@
 package webfilter
 
 import (
+	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -53,21 +52,16 @@ func (h *Handler) doPost(w http.ResponseWriter, req *http.Request) error {
 	}
 	defer body.Close()
 
-	tmpFile, err := ioutil.TempFile("", h.Title)
-	defer tmpFile.Close()
-	defer os.Remove(tmpFile.Name())
-
-	fname, err := h.Filter(body, tmpFile)
+	var buf bytes.Buffer
+	fname, err := h.Filter(body, &buf)
 	if err != nil {
 		return err
 	}
 
-	tmpFile.Seek(0, os.SEEK_SET)
-
 	headers := w.Header()
 	headers.Add("Content-Disposition", "attachment; filename="+fname)
 
-	http.ServeContent(w, req, fname, time.Now(), tmpFile)
+	http.ServeContent(w, req, fname, time.Now(), bytes.NewReader(buf.Bytes()))
 	return nil
 }
 
