@@ -10,6 +10,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/toqueteos/webbrowser"
 )
 
 type Handler struct {
@@ -80,4 +82,20 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Println(err.Error())
 	}
+}
+
+func (h *Handler) Run(portNo int) {
+	port := fmt.Sprintf(":%d", portNo)
+	service := &http.Server{
+		Addr:           port,
+		Handler:        h,
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		MaxHeaderBytes: 1 << 20,
+	}
+	go func() {
+		webbrowser.Open("http://127.0.0.1" + port)
+	}()
+	service.ListenAndServe()
+	service.Close()
 }
