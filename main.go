@@ -3,6 +3,7 @@ package main
 import (
 	"archive/zip"
 	"encoding/csv"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -42,6 +43,9 @@ func mains(args []string) error {
 			data[key] = append(data[key], val)
 		}
 		fd.Close()
+	}
+	if len(data) <= 0 {
+		return errors.New("no data")
 	}
 	zipFd, err := os.Create(*flagOutput)
 	if err != nil {
