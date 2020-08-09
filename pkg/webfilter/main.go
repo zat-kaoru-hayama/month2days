@@ -15,10 +15,9 @@ import (
 )
 
 type Handler struct {
-	Filter   func(io.Reader, io.Writer) error
-	Title    string
-	Message  string
-	Filename string
+	Filter  func(io.Reader, io.Writer) (string, error)
+	Title   string
+	Message string
 }
 
 func (h *Handler) doGet(w http.ResponseWriter, req *http.Request) error {
@@ -58,14 +57,17 @@ func (h *Handler) doPost(w http.ResponseWriter, req *http.Request) error {
 	defer tmpFile.Close()
 	defer os.Remove(tmpFile.Name())
 
-	h.Filter(body, tmpFile)
+	fname, err := h.Filter(body, tmpFile)
+	if err != nil {
+		return err
+	}
 
 	tmpFile.Seek(0, os.SEEK_SET)
 
 	headers := w.Header()
-	headers.Add("Content-Disposition", "attachment; filename="+h.Filename)
+	headers.Add("Content-Disposition", "attachment; filename="+fname)
 
-	http.ServeContent(w, req, h.Filename, time.Now(), tmpFile)
+	http.ServeContent(w, req, fname, time.Now(), tmpFile)
 	return nil
 }
 

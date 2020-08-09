@@ -9,16 +9,21 @@ import (
 )
 
 func main() {
-	handler := &webfilter.Handler{
-		Filter: func(r io.Reader, w io.Writer) error {
+	h := &webfilter.Handler{
+		Filter: func(r io.Reader, w io.Writer) (string, error) {
 			storage := month2days.New()
-			storage.Add(r, os.Stderr)
-			storage.DumpZip(w)
-			return nil
+			err := storage.Add(r, os.Stderr)
+			if err != nil {
+				return "", err
+			}
+			err = storage.DumpZip(w)
+			if err != nil {
+				return "", err
+			}
+			return "output.zip", nil
 		},
-		Title:    "month2days",
-		Message:  "Please upload the monthly TSV-files to download the daily TSV-files converted.",
-		Filename: "output.zip",
+		Title:   "month2days",
+		Message: "Please upload the monthly TSV-files to download the daily TSV-files converted.",
 	}
-	handler.Run(8000)
+	h.Run(8000)
 }
