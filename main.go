@@ -1,12 +1,16 @@
 package main
 
 import (
+	"archive/zip"
 	"encoding/csv"
+	"flag"
 	"fmt"
 	"io"
 	"os"
 	"strings"
 )
+
+var flagOutput = flag.String("o", "output.zip", "output-zip name")
 
 func mains(args []string) error {
 	data := map[string][]string{}
@@ -39,9 +43,16 @@ func mains(args []string) error {
 		}
 		fd.Close()
 	}
+	zipFd, err := os.Create(*flagOutput)
+	if err != nil {
+		return err
+	}
+	defer zipFd.Close()
+	zipWriter := zip.NewWriter(zipFd)
+	defer zipWriter.Close()
 	for date, lines := range data {
 		tsvName := strings.Replace(date, "/", "", -1) + ".tsv"
-		fd, err := os.Create(tsvName)
+		fd, err := zipWriter.Create(tsvName)
 		if err != nil {
 			return err
 		}
@@ -51,12 +62,12 @@ func mains(args []string) error {
 		for _, line := range lines {
 			fmt.Fprintf(fd, "%s\r\n", line)
 		}
-		fd.Close()
 	}
 	return nil
 }
 
 func main() {
+	flag.Parse()
 	if err := mains(os.Args[1:]); err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(1)
