@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	h := &webfilter.Handler{
+	h := &webfilter.Condition{
 		Filter: func(r io.Reader, w io.Writer) (string, error) {
 			storage := month2days.New()
 			err := storage.Add(r, os.Stderr)
@@ -25,5 +25,5 @@ func main() {
 		Title:   "month2days",
 		Message: "Please upload the monthly TSV-files to download the daily TSV-files converted.",
 	}
-	h.Run(8000)
+	h.StartServiceAndBrowser(8000)
 }

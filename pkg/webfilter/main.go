@@ -19,6 +19,8 @@ type Handler struct {
 	Message string
 }
 
+type Condition = Handler
+
 func (h *Handler) doGet(w http.ResponseWriter, req *http.Request) error {
 	headers := w.Header()
 	headers.Add("Content-Type", "text/html")
@@ -80,7 +82,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (h *Handler) Run(portNo int) {
+func (h *Handler) StartServiceAndBrowser(portNo int) {
 	port := fmt.Sprintf(":%d", portNo)
 	service := &http.Server{
 		Addr:           port,
