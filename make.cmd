@@ -15,5 +15,6 @@ exit /b
     exit /b
 
 :"package"
-    for %%I in ( %DIRS% ) do zip %%~nI-%DATE:/=%.zip %%I\*.exe
+    set /P "VERSION=Version ?"
+    for %%I in ( %DIRS% ) do zip %%~nI-%VERSION%.zip %%I\*.exe
     exit /b
