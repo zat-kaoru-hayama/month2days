@@ -10,7 +10,6 @@ exit /b
     for %%I in ( %DIRS% ) do (
         pushd %%I
         go build -ldflags "-s -w"
-        upx *.exe
         popd %%I
     )
     exit /b
