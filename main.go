@@ -28,6 +28,7 @@ func (storage *Storage) Add(r io.Reader, warn io.Writer) error {
 	reader := csv.NewReader(r)
 	reader.Comma = '\t'
 	reader.FieldsPerRecord = -1 // field number check off
+	reader.LazyQuotes = true
 	for {
 		record, err := reader.Read()
 		if err != nil {
